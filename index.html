@@ -10,7 +10,7 @@
             --card-bg: #ecf0f1;
             --accent: #e67e22; 
             --success: #2ecc71;
-            --error: #e74c3c;
+            --error: #c0392b;
             --text: #34495e;
         }
 
@@ -23,10 +23,10 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            height: 100vh; /* Force full height */
+            height: 100vh;
             margin: 0;
             padding: 10px;
-            overflow: hidden; /* Prevent scrolling */
+            overflow: hidden;
             user-select: none;
         }
 
@@ -40,29 +40,47 @@
             padding: 5px 10px;
             background: rgba(0,0,0,0.2);
             border-radius: 10px;
-            flex-shrink: 0; /* Never shrink */
+            flex-shrink: 0;
+            margin-bottom: 5px;
         }
 
-        .stat-box { text-align: center; }
+        .stat-box { text-align: center; margin: 0 10px; }
         .stat-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.8; }
         .stat-value { font-size: 1.2rem; font-weight: bold; color: var(--accent); }
+
+        .icon-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+        .icon-btn:hover { background: rgba(255,255,255,0.4); }
 
         .timer-container {
             width: 100%;
             max-width: 600px;
-            height: 6px;
+            height: 8px;
             background: #34495e;
-            border-radius: 3px;
-            margin: 10px 0;
+            border-radius: 4px;
+            margin: 5px 0 10px 0;
             overflow: hidden;
             flex-shrink: 0;
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
         .timer-bar {
             height: 100%;
             background: var(--success);
             width: 100%;
-            transition: width 0.1s linear;
+            transition: width 0.1s linear, background-color 0.3s;
         }
         .timer-bar.critical { background: var(--error); }
 
@@ -79,7 +97,7 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
             transform: rotate(-1deg);
             transition: transform 0.3s;
-            flex-shrink: 1; /* Allow shrinking if needed */
+            flex-shrink: 1;
             margin-bottom: 10px;
             display: flex;
             flex-direction: column;
@@ -106,26 +124,27 @@
         
         .highlight { color: #d35400; font-weight: bold; }
 
-        /* --- LINEUP (Adaptive Grid) --- */
+        /* --- LINEUP --- */
         .lineup-container {
-            flex-grow: 1; /* Take up remaining space */
+            flex-grow: 1;
             width: 100%;
             max-width: 800px;
             display: grid;
-            gap: 10px;
+            gap: 12px;
             padding-bottom: 10px;
-            /* Default grid, JS will override for specific counts if needed */
             grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
             align-content: center; 
             justify-content: center;
+            opacity: 1;
+            transition: opacity 0.3s;
         }
+        
+        .lineup-container.paused { opacity: 0; pointer-events: none; }
 
-        /* Dynamic classes based on suspect count for mobile optimization */
         .lineup-container.count-3 { grid-template-columns: repeat(3, 1fr); }
         .lineup-container.count-4 { grid-template-columns: repeat(2, 1fr); }
         .lineup-container.count-6 { grid-template-columns: repeat(3, 1fr); }
 
-        /* Media query for portrait mobile specifically */
         @media (max-aspect-ratio: 1/1) {
             .lineup-container.count-6 { grid-template-columns: repeat(2, 1fr); }
             .description-text { font-size: 1rem; }
@@ -138,23 +157,45 @@
             cursor: pointer;
             position: relative;
             display: flex;
-            justify-content: center;
+            flex-direction: column; 
+            justify-content: space-between; 
             align-items: center;
             border-bottom: 4px solid #bdc3c7;
             animation: popIn 0.3s ease-out backwards;
             height: 100%;
-            max-height: 180px; /* Cap height on large screens */
+            max-height: 200px;
             width: 100%;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
 
         .suspect-card:active { transform: translateY(2px); border-bottom-width: 2px; }
 
-        /* SVG Avatar Styles - Make them scale to fit container */
+        .avatar-wrapper {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 5px;
+        }
+
         .avatar-svg {
             width: 100%;
-            height: 100%;
             max-width: 140px;
             max-height: 140px;
+        }
+
+        .date-tag {
+            background: #34495e;
+            color: #fff;
+            width: 100%;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+            padding: 8px 0;
+            border-top: 1px solid rgba(0,0,0,0.1);
+            flex-shrink: 0; 
         }
 
         .suspect-card.wrong {
@@ -171,12 +212,17 @@
             border-color: #00b894;
             z-index: 10;
         }
+        
+        .suspect-card.correct .date-tag {
+             background: #27ae60;
+             border-color: #2ecc71;
+        }
 
         /* --- SCREENS & FX --- */
         .floater {
             position: absolute;
             font-weight: bold;
-            font-size: 2rem;
+            font-size: 2.5rem;
             pointer-events: none;
             animation: floatUp 0.8s forwards;
             z-index: 100;
@@ -192,6 +238,7 @@
             justify-content: center;
             align-items: center;
             z-index: 999;
+            backdrop-filter: blur(5px);
         }
         
         .hidden { display: none; }
@@ -207,7 +254,21 @@
             margin-top: 20px;
             font-weight: bold;
             box-shadow: 0 5px 15px rgba(230, 126, 34, 0.4);
+            transition: transform 0.2s;
         }
+        .btn:hover { transform: scale(1.05); }
+
+        .sound-toggle {
+            margin-top: 20px;
+            background: transparent;
+            border: 2px solid white;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        .sound-toggle.muted { opacity: 0.5; }
 
         @keyframes popIn { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
         @keyframes shake {
@@ -225,8 +286,15 @@
     <!-- START SCREEN -->
     <div id="start-screen" class="screen">
         <h1 style="font-size: 2.5rem; margin-bottom: 10px; text-align: center;">Das Phantombild</h1>
-        <p style="font-size: 1.1rem; color: #bdc3c7; text-align: center; max-width: 80%;">Find the suspect based on the German description.</p>
+        <p style="font-size: 1.1rem; color: #bdc3c7; text-align: center; max-width: 80%;">Find the suspect based on the German description.<br><br>Read carefully!</p>
         <button class="btn" onclick="startGame()">Start Game</button>
+        <button class="sound-toggle" id="soundToggle" onclick="toggleMute()">🔊 Sound On</button>
+    </div>
+
+    <!-- PAUSE SCREEN -->
+    <div id="pause-screen" class="screen hidden">
+        <h1>PAUSE</h1>
+        <button class="btn" onclick="togglePause()">Resume</button>
     </div>
 
     <!-- GAME OVER SCREEN -->
@@ -239,16 +307,19 @@
         <button class="btn" onclick="startGame()">Play Again</button>
     </div>
 
-    <!-- MAIN GAME -->
+    <!-- MAIN GAME HUD -->
     <div class="hud">
         <div class="stat-box">
             <div class="stat-label">Level</div>
             <div class="stat-value" id="level-display">1</div>
         </div>
+        
         <div class="stat-box">
             <div class="stat-label">Score</div>
             <div class="stat-value" id="score-display">0</div>
         </div>
+
+        <button class="icon-btn" onclick="togglePause()" title="Pause Game">⏸</button>
     </div>
 
     <div class="timer-container">
@@ -266,12 +337,52 @@
     <canvas id="confetti-canvas"></canvas>
 
 <script>
+    // --- AUDIO SYSTEM ---
+    let audio = {
+        enabled: true,
+        voices: []
+    };
+
+    function initAudio() {
+        // Load voices
+        window.speechSynthesis.onvoiceschanged = () => {
+            audio.voices = window.speechSynthesis.getVoices();
+        };
+        audio.voices = window.speechSynthesis.getVoices();
+    }
+
+    function toggleMute() {
+        audio.enabled = !audio.enabled;
+        const btn = document.getElementById('soundToggle');
+        if(audio.enabled) {
+            btn.textContent = "🔊 Sound On";
+            btn.classList.remove('muted');
+        } else {
+            btn.textContent = "🔇 Sound Off";
+            btn.classList.add('muted');
+            window.speechSynthesis.cancel();
+        }
+    }
+
+    function speak(text) {
+        if(!audio.enabled) return;
+        window.speechSynthesis.cancel();
+
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'de-DE';
+        
+        // Try to find a good German voice
+        const deVoice = audio.voices.find(v => v.lang.includes('de') && !v.name.includes('Google'));
+        if(deVoice) utterance.voice = deVoice;
+
+        utterance.rate = 0.9; // Slightly slower for students
+        window.speechSynthesis.speak(utterance);
+    }
+
     // --- DATA ---
-    
-    // Values are in standard Nominative/Accusative Plural (ending in -e)
     const hairColors = [
         { de: "blonde", hex: "#f1c27d", dark: "#e0b06c" },
-        { de: "braune", hex: "#5d4037", dark: "#4e342e" },
+        { de: "braune", hex: "#A1887F", dark: "#8D6E63" }, 
         { de: "schwarze", hex: "#2c2c2c", dark: "#000000" },
         { de: "rote", hex: "#d84315", dark: "#bf360c" }
     ];
@@ -283,10 +394,10 @@
     ];
 
     const roles = [
-        { de: "der Bruder", pron: "Er", gender: "male" },
-        { de: "die Schwester", pron: "Sie", gender: "female" },
-        { de: "der Vater", pron: "Er", gender: "male" }, 
-        { de: "die Mutter", pron: "Sie", gender: "female" }
+        { category: "ein Junge", pron: "Er", gender: "male" },
+        { category: "ein Mädchen", pron: "Sie", gender: "female" },
+        { category: "ein Mann", pron: "Er", gender: "male" }, 
+        { category: "eine Frau", pron: "Sie", gender: "female" }
     ];
 
     const moods = [
@@ -300,6 +411,27 @@
         { de: "eine Brille", has: true },
         { de: "keine Brille", has: false }
     ];
+    
+    const shirtColors = [
+        { de: "lila", hex: "#9b59b6", adj: "lila" },
+        { de: "rosa", hex: "#ff9ff3", adj: "rosa" },
+        { de: "orange", hex: "#e67e22", adj: "oranges" },
+        { de: "gelb", hex: "#f1c40f", adj: "gelbes" }
+    ];
+
+    const months = [
+        "Januar", "Februar", "März", "April", "Mai", "Juni", 
+        "Juli", "August", "September", "Oktober", "November", "Dezember"
+    ];
+
+    const ordinalStems = {
+        1: "erst", 2: "zweit", 3: "dritt", 4: "viert", 5: "fünft",
+        6: "sechst", 7: "siebt", 8: "acht", 9: "neunt", 10: "zehnt",
+        11: "elft", 12: "zwölft", 13: "dreizehnt", 14: "vierzehnt", 15: "fünfzehnt",
+        16: "sechzehnt", 17: "siebzehnt", 18: "achtzehnt", 19: "neunzehnt", 20: "zwanzigst",
+        21: "einundzwanzigst", 22: "zweiundzwanzigst", 23: "dreiundzwanzigst", 24: "vierundzwanzigst", 25: "fünfundzwanzigst",
+        26: "sechsundzwanzigst", 27: "siebenundzwanzigst", 28: "achtundzwanzigst", 29: "neunundzwanzigst", 30: "dreißigst", 31: "einunddreißigst"
+    };
 
     // --- STATE ---
     let state = {
@@ -309,90 +441,100 @@
         maxTime: 60,
         target: null,
         isPlaying: false,
+        isPaused: false,
         timerInterval: null
     };
 
-    // --- ULTIMATE SVG GENERATOR ---
+    // --- GENERATORS ---
+    function getRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+    function generateBirthday() {
+        const monthIndex = Math.floor(Math.random() * 12);
+        const day = Math.floor(Math.random() * 28) + 1; 
+        
+        const dStr = day < 10 ? `0${day}` : `${day}`;
+        const mStr = (monthIndex + 1) < 10 ? `0${monthIndex+1}` : `${monthIndex+1}`;
+        
+        return {
+            day: day,
+            month: months[monthIndex],
+            display: `${dStr}.${mStr}.`, 
+            textStem: ordinalStems[day]
+        };
+    }
+
+    function generatePerson() {
+        return {
+            id: Math.random().toString(36).substr(2, 9),
+            hair: getRandom(hairColors),
+            eye: getRandom(eyeColors),
+            role: getRandom(roles),
+            mood: getRandom(moods),
+            glass: getRandom(glasses),
+            shirt: getRandom(shirtColors), 
+            birthday: generateBirthday()
+        };
+    }
+
+    // --- SVG GENERATOR ---
     function createComplexAvatar(person) {
         const skin = "#f3d2c1"; 
         const skinShadow = "#eebb99";
-        const shirt = `hsl(${Math.random() * 360}, 50%, 45%)`;
+        const shirt = person.shirt.hex;
         
-        // Viewbox 200x200
         let svg = `<svg viewBox="0 0 200 200" class="avatar-svg" xmlns="http://www.w3.org/2000/svg">`;
         
-        // 1. BODY
         svg += `<path d="M40,180 Q100,165 160,180 V200 H40 Z" fill="${shirt}"/>`;
-        
-        // 2. FACE BASE
         svg += `<path d="M60,100 Q60,175 100,175 Q140,175 140,100 Q140,50 100,50 Q60,50 60,100" fill="${skin}"/>`;
-        svg += `<path d="M80,160 Q100,170 120,160" fill="none" stroke="${skinShadow}" stroke-width="3" stroke-linecap="round"/>`; // Chin shadow
+        svg += `<path d="M80,160 Q100,170 120,160" fill="none" stroke="${skinShadow}" stroke-width="3" stroke-linecap="round"/>`; 
 
-        // 3. EARS
         svg += `<circle cx="58" cy="110" r="12" fill="${skin}"/>`;
         svg += `<circle cx="142" cy="110" r="12" fill="${skin}"/>`;
 
-        // 4. FEATURES
         let mouth = "", lb = "", rb = "", extra = "";
         const mY = 145; 
         const bY = 90;
 
         switch(person.mood.type) {
             case 'happy':
-                // Big open smile with teeth
                 mouth = `<path d="M75,${mY} Q100,${mY+20} 125,${mY} Z" fill="white" stroke="#c0392b" stroke-width="2"/>`; 
-                lb = `M70,${bY} Q85,${bY-15} 95,${bY}`; // High arch
+                lb = `M70,${bY} Q85,${bY-15} 95,${bY}`; 
                 rb = `M105,${bY} Q115,${bY-15} 130,${bY}`;
                 break;
             case 'sad':
-                // Downturned curve
                 mouth = `<path d="M80,${mY+10} Q100,${mY-5} 120,${mY+10}" fill="none" stroke="#c0392b" stroke-width="3" stroke-linecap="round"/>`;
-                // Worried brows (/ \)
                 lb = `M70,${bY} L95,${bY-8}`; 
                 rb = `M105,${bY-8} L130,${bY}`;
-                // TEAR DROP!
                 extra = `<path d="M85,120 Q90,128 85,135 Q80,128 85,120" fill="#3498db" opacity="0.8"/>`;
                 break;
             case 'angry':
-                // Gritted teeth / squiggle
                 mouth = `<path d="M80,${mY+5} L90,${mY} L100,${mY+5} L110,${mY} L120,${mY+5}" fill="none" stroke="#c0392b" stroke-width="2"/>`;
-                // Angry brows (\ /)
                 lb = `M70,${bY-5} L95,${bY+10}`;
                 rb = `M105,${bY+10} L130,${bY-5}`;
                 break;
             case 'serious':
-                // Straight line
                 mouth = `<line x1="85" y1="${mY+5}" x2="115" y2="${mY+5}" stroke="#c0392b" stroke-width="3" stroke-linecap="round"/>`;
                 lb = `M70,${bY} L95,${bY}`;
                 rb = `M105,${bY} L130,${bY}`;
                 break;
         }
 
-        // Eyebrows
         svg += `<path d="${lb}" stroke="${person.hair.dark}" stroke-width="4" fill="none" stroke-linecap="round" />`;
         svg += `<path d="${rb}" stroke="${person.hair.dark}" stroke-width="4" fill="none" stroke-linecap="round" />`;
 
-        // Eyes
         svg += `<g>`;
-        // Sclera
-        svg += `<circle cx="80" cy="110" r="10" fill="white"/>`;
-        svg += `<circle cx="120" cy="110" r="10" fill="white"/>`;
-        // Iris
-        svg += `<circle cx="80" cy="110" r="6" fill="${person.eye.hex}"/>`;
-        svg += `<circle cx="120" cy="110" r="6" fill="${person.eye.hex}"/>`;
-        // Pupil
+        svg += `<circle cx="80" cy="110" r="12" fill="white"/>`;
+        svg += `<circle cx="120" cy="110" r="12" fill="white"/>`;
+        svg += `<circle cx="80" cy="110" r="8.5" fill="${person.eye.hex}"/>`;
+        svg += `<circle cx="120" cy="110" r="8.5" fill="${person.eye.hex}"/>`;
         svg += `<circle cx="80" cy="110" r="3" fill="#222"/>`;
         svg += `<circle cx="120" cy="110" r="3" fill="#222"/>`;
         svg += `</g>`;
 
-        // Nose
         svg += `<path d="M100,118 L95,132 L105,132 Z" fill="${skinShadow}"/>`;
-
-        // Add Mouth & Extra (Tear)
         svg += mouth;
         svg += extra;
 
-        // 5. GLASSES
         if(person.glass.has) {
             svg += `<g stroke="#333" stroke-width="2.5" fill="rgba(255,255,255,0.3)">
                 <circle cx="80" cy="110" r="17"/>
@@ -403,20 +545,15 @@
             </g>`;
         }
 
-        // 6. HAIR
         const hC = person.hair.hex;
         if (person.role.gender === 'female') {
-            // Back
             svg = `<path d="M60,100 Q40,180 30,200 H170 Q160,180 140,100" fill="${hC}"/>` + svg;
-            // Front Bangs
             svg += `<path d="M60,90 Q60,35 100,35 Q140,35 140,90 L140,60 Q100,50 60,60 Z" fill="${hC}"/>`;
-            // Sides
             svg += `<path d="M140,60 Q148,120 155,160 L130,160 Q135,100 140,60" fill="${hC}"/>`;
             svg += `<path d="M60,60 Q52,120 45,160 L70,160 Q65,100 60,60" fill="${hC}"/>`;
         } else {
-            // Short
             svg += `<path d="M55,90 Q60,25 100,25 Q140,25 145,90 Q145,55 100,40 Q55,55 55,90" fill="${hC}"/>`;
-            svg += `<path d="M58,90 V115 L65,105 V90 Z" fill="${hC}"/>`; // Sideburns
+            svg += `<path d="M58,90 V115 L65,105 V90 Z" fill="${hC}"/>`; 
             svg += `<path d="M142,90 V115 L135,105 V90 Z" fill="${hC}"/>`;
         }
 
@@ -424,40 +561,50 @@
         return svg;
     }
 
-    // --- LOGIC ---
-
-    function getRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
-
-    function generatePerson() {
-        return {
-            id: Math.random().toString(36).substr(2, 9),
-            hair: getRandom(hairColors),
-            eye: getRandom(eyeColors),
-            role: getRandom(roles),
-            mood: getRandom(moods),
-            glass: getRandom(glasses)
-        };
-    }
+    // --- GAME LOGIC ---
 
     function startGame() {
         document.getElementById('start-screen').classList.add('hidden');
         document.getElementById('game-over-screen').classList.add('hidden');
-        state.score = 0; state.level = 1; state.timeLeft = 60; state.isPlaying = true;
+        state.score = 0; state.level = 1; state.timeLeft = 60; state.isPlaying = true; state.isPaused = false;
         updateHUD();
         startTimer();
         newRound();
+        initAudio();
+    }
+
+    function togglePause() {
+        if(!state.isPlaying) return;
+        
+        state.isPaused = !state.isPaused;
+        const pauseScreen = document.getElementById('pause-screen');
+        const lineup = document.getElementById('lineup');
+        
+        if(state.isPaused) {
+            pauseScreen.classList.remove('hidden');
+            lineup.classList.add('paused');
+            window.speechSynthesis.pause();
+        } else {
+            pauseScreen.classList.add('hidden');
+            lineup.classList.remove('paused');
+            window.speechSynthesis.resume();
+        }
     }
 
     function startTimer() {
         if(state.timerInterval) clearInterval(state.timerInterval);
         state.timerInterval = setInterval(() => {
-            if(!state.isPlaying) return;
+            if(!state.isPlaying || state.isPaused) return;
+
             state.timeLeft -= 0.1;
             const bar = document.getElementById('timer-bar');
-            const pct = (state.timeLeft / state.maxTime) * 100;
+            // Strict Cap at 100%
+            const pct = Math.min((state.timeLeft / state.maxTime) * 100, 100);
             bar.style.width = `${pct}%`;
+            
             if(state.timeLeft <= 10) bar.classList.add('critical');
             else bar.classList.remove('critical');
+            
             if(state.timeLeft <= 0) gameOver();
         }, 100);
     }
@@ -465,16 +612,20 @@
     function gameOver() {
         state.isPlaying = false;
         clearInterval(state.timerInterval);
+        window.speechSynthesis.cancel();
         document.getElementById('final-score').textContent = state.score;
         document.getElementById('game-over-screen').classList.remove('hidden');
     }
 
     function determineLevel() {
-        if(state.score < 3) return 1; // Hair
-        if(state.score < 6) return 2; // Hair + Role
-        if(state.score < 10) return 3; // + Eyes
-        if(state.score < 15) return 4; // + Mood
-        return 5; // + Glasses (Max difficulty)
+        if(state.score < 4) return 1; 
+        if(state.score < 8) return 2; 
+        if(state.score < 13) return 3; 
+        if(state.score < 18) return 4; 
+        if(state.score < 24) return 5; 
+        if(state.score < 30) return 6; 
+        if(state.score < 36) return 7; 
+        return 8; 
     }
 
     function newRound() {
@@ -489,7 +640,6 @@
         if(state.level >= 2) count = 4;
         if(state.level >= 4) count = 6;
 
-        // Reset grid class
         const container = document.getElementById('lineup');
         container.className = 'lineup-container count-' + count;
 
@@ -500,16 +650,21 @@
             
             let mH = d.hair.de === target.hair.de;
             let mE = d.eye.de === target.eye.de;
-            let mR = d.role.de === target.role.de;
+            // FIX: Check GENDER, not CATEGORY, to treat Man/Boy and Woman/Girl as visually identical
+            let mR = d.role.gender === target.role.gender; 
             let mM = d.mood.de === target.mood.de;
             let mG = d.glass.de === target.glass.de;
+            let mD = d.birthday.display === target.birthday.display;
+            let mS = d.shirt.de === target.shirt.de;
 
-            // Logic: Distractors must NOT match the visible clues for this level
             if(state.level === 1) { if(mH) clash = true; }
             else if(state.level === 2) { if(mH && mR) clash = true; }
             else if(state.level === 3) { if(mH && mR && mE) clash = true; }
-            else if(state.level === 4) { if(mH && mR && mE && mM) clash = true; }
-            else { if(mH && mR && mE && mM && mG) clash = true; }
+            else if(state.level === 4) { if(mH && mR && mE && mM && mG) clash = true; }
+            else if(state.level === 5) { if(mD) clash = true; } 
+            else if(state.level === 6) { if(mD && mM) clash = true; }
+            else if(state.level === 7) { if(mS) clash = true; } 
+            else { if(mH && mR && mE && mM && mG && mD && mS) clash = true; }
 
             if(!clash) suspects.push(d);
         }
@@ -519,41 +674,66 @@
 
     function renderScene(target, suspects) {
         let html = "";
+        let textForSpeech = "";
         const h = `<span class='highlight'>`;
         const e = `</span>`;
+        
+        const glassText = target.glass.has ? `Außerdem hat ${target.role.pron.toLowerCase()} eine Brille.` : "";
+        const hairLen = target.role.gender === 'female' ? 'lange' : 'kurze';
+        const hairLenDat = target.role.gender === 'female' ? 'langen' : 'kurzen';
 
         if(state.level === 1) {
-            // FIX: Dative case! "mit" requires dative plural ending (n)
-            // braune -> braunen, blonde -> blonden
-            html = `Gesucht wird eine Person mit ${h}${target.hair.de}n Haaren${e}.`;
+            html = `Gesucht wird ${target.role.category} mit ${h}${hairLenDat}, ${target.hair.de}n Haaren${e}.`;
+            textForSpeech = `Gesucht wird ${target.role.category} mit ${hairLenDat}, ${target.hair.de}n Haaren.`;
         } else if (state.level === 2) {
-            html = `Gesucht wird ${h}${target.role.de}${e}.<br>
-                    ${target.role.pron} hat ${h}${target.hair.de} Haare${e}.`;
+            html = `Gesucht wird ${h}${target.role.category}${e}.<br>
+                    ${target.role.pron} hat ${h}${hairLen}, ${target.hair.de} Haare${e}.`;
+            textForSpeech = `Gesucht wird ${target.role.category}. ${target.role.pron} hat ${hairLen}, ${target.hair.de} Haare.`;
         } else if (state.level === 3) {
-            html = `Gesucht wird ${h}${target.role.de}${e}.<br>
-                    ${target.role.pron} hat ${h}${target.eye.de} Augen${e}.<br>
-                    (Und ${target.hair.de} Haare)`;
+            html = `Gesucht wird ${h}${target.role.category}${e}.<br>
+                    ${target.role.pron} hat ${h}${target.eye.de} Augen${e} und ${h}${hairLen}, ${target.hair.de} Haare${e}.`;
+            textForSpeech = `Gesucht wird ${target.role.category}. ${target.role.pron} hat ${target.eye.de} Augen und ${hairLen}, ${target.hair.de} Haare.`;
         } else if (state.level === 4) {
-             html = `Gesucht wird ${h}${target.role.de}${e}.<br>
+             html = `Gesucht wird ${h}${target.role.category}${e}.<br>
+                    ${target.role.pron} ist ${h}${target.mood.de}${e} und hat ${h}${target.eye.de} Augen${e}.<br>
+                    ${h}${glassText}${e}`;
+             textForSpeech = `Gesucht wird ${target.role.category}. ${target.role.pron} ist ${target.mood.de} und hat ${target.eye.de} Augen. ${glassText}`;
+        } else if (state.level === 5) {
+             html = `Gesucht wird ${h}${target.role.category}${e}.<br>
+                    ${target.role.pron} hat am ${h}${target.birthday.textStem}en ${target.birthday.month}${e} Geburtstag.`;
+             textForSpeech = `Gesucht wird ${target.role.category}. ${target.role.pron} hat am ${target.birthday.textStem}en ${target.birthday.month} Geburtstag.`;
+        } else if (state.level === 6) {
+            html = `Gesucht wird ${h}${target.role.category}${e}.<br>
                     ${target.role.pron} ist ${h}${target.mood.de}${e}.<br>
-                    ${target.role.pron} hat ${h}${target.eye.de} Augen${e}.`;
+                    ${target.role.pron} hat am ${h}${target.birthday.textStem}en ${target.birthday.month}${e} Geburtstag.`;
+            textForSpeech = `Gesucht wird ${target.role.category}. ${target.role.pron} ist ${target.mood.de}. ${target.role.pron} hat am ${target.birthday.textStem}en ${target.birthday.month} Geburtstag.`;
+        } else if (state.level === 7) {
+             html = `Gesucht wird ${h}${target.role.category}${e}.<br>
+                    ${target.role.pron} hat ${h}ein ${target.shirt.adj} T-Shirt${e} an.`;
+             textForSpeech = `Gesucht wird ${target.role.category}. ${target.role.pron} hat ein ${target.shirt.adj} T-Shirt an.`;
         } else {
-            html = `Gesucht wird ${h}${target.role.de}${e}.<br>
-                    ${target.role.pron} ist ${h}${target.mood.de}${e}.<br>
-                    ${target.role.pron} hat ${h}${target.hair.de} Haare${e} und ${h}${target.glass.de}${e}.`;
+            html = `Gesucht wird ${h}${target.role.category}${e}.<br>
+                    ${target.role.pron} ist ${h}${target.mood.de}${e} und hat ${h}ein ${target.shirt.adj} T-Shirt${e} an.<br>
+                    ${target.role.pron} hat am ${h}${target.birthday.textStem}en ${target.birthday.month}${e} Geburtstag.<br>
+                    ${glassText}`;
+            textForSpeech = `Gesucht wird ${target.role.category}. ${target.role.pron} ist ${target.mood.de} und hat ein ${target.shirt.adj} T-Shirt an. ${target.role.pron} hat am ${target.birthday.textStem}en ${target.birthday.month} Geburtstag. ${glassText}`;
         }
 
         document.getElementById('description').innerHTML = html;
+        speak(textForSpeech); 
+
         const container = document.getElementById('lineup');
         container.innerHTML = '';
 
         suspects.forEach((p, index) => {
             const card = document.createElement('div');
             card.className = 'suspect-card';
-            // Stagger animation
             card.style.animationDelay = `${index * 0.05}s`;
             
-            card.innerHTML = createComplexAvatar(p);
+            const svgHTML = `<div class="avatar-wrapper">${createComplexAvatar(p)}</div>`;
+            const dateHTML = `<div class="date-tag">${p.birthday.display}</div>`;
+
+            card.innerHTML = svgHTML + dateHTML;
             card.onclick = (e) => handleGuess(p.id, card, e);
             container.appendChild(card);
         });
@@ -563,25 +743,23 @@
         if(card.classList.contains('wrong') || card.classList.contains('correct')) return;
         
         if(id === state.target.id) {
-            // CORRECT
             card.classList.add('correct');
             state.score++;
             
-            // Add time
             let bonus = 3; 
-            if(state.level >= 3) bonus = 5;
+            if(state.level >= 3) bonus = 5; 
+            if(state.level >= 5) bonus = 8; 
+
             state.timeLeft = Math.min(state.timeLeft + bonus, state.maxTime);
             
-            // Visuals
             showFloater(event.clientX, event.clientY, `+${bonus}s`, '#2ecc71');
             fireConfetti();
             
-            setTimeout(newRound, 1000);
+            setTimeout(newRound, 1200);
         } else {
-            // WRONG
             card.classList.add('wrong');
-            state.timeLeft -= 3;
-            showFloater(event.clientX, event.clientY, `-3s`, '#e74c3c');
+            state.timeLeft -= 5;
+            showFloater(event.clientX, event.clientY, `-5s`, '#c0392b');
             
             const poster = document.getElementById('poster');
             poster.style.transform = "rotate(3deg) scale(0.95)";
@@ -625,6 +803,8 @@
         }
         animate();
     }
+    
+    initAudio();
 </script>
 </body>
 </html>
