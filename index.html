@@ -2,17 +2,19 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Das Phantombild: Deluxe Edition</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Das Phantombild: Ultimate Edition</title>
     <style>
         :root {
             --bg-color: #2c3e50;
             --card-bg: #ecf0f1;
-            --accent: #e67e22; /* Carrot orange */
+            --accent: #e67e22; 
             --success: #2ecc71;
             --error: #e74c3c;
             --text: #34495e;
         }
+
+        * { box-sizing: border-box; }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -21,132 +23,140 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            min-height: 100vh;
+            height: 100vh; /* Force full height */
             margin: 0;
             padding: 10px;
-            overflow-x: hidden;
+            overflow: hidden; /* Prevent scrolling */
             user-select: none;
         }
 
-        /* --- HUD (Heads Up Display) --- */
+        /* --- HUD --- */
         .hud {
             width: 100%;
-            max-width: 800px;
+            max-width: 600px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
-            padding: 10px;
+            padding: 5px 10px;
             background: rgba(0,0,0,0.2);
             border-radius: 10px;
+            flex-shrink: 0; /* Never shrink */
         }
 
-        .stat-box {
-            text-align: center;
-        }
+        .stat-box { text-align: center; }
+        .stat-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.8; }
+        .stat-value { font-size: 1.2rem; font-weight: bold; color: var(--accent); }
 
-        .stat-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.8; }
-        .stat-value { font-size: 1.5rem; font-weight: bold; color: var(--accent); }
-
-        /* Timer Bar */
         .timer-container {
             width: 100%;
-            max-width: 800px;
-            height: 10px;
+            max-width: 600px;
+            height: 6px;
             background: #34495e;
-            border-radius: 5px;
-            margin-bottom: 20px;
+            border-radius: 3px;
+            margin: 10px 0;
             overflow: hidden;
+            flex-shrink: 0;
         }
 
         .timer-bar {
             height: 100%;
             background: var(--success);
             width: 100%;
-            transition: width 0.1s linear, background-color 0.5s;
+            transition: width 0.1s linear;
         }
-
         .timer-bar.critical { background: var(--error); }
 
-        /* --- WANTED POSTER --- */
+        /* --- POSTER --- */
         .wanted-poster {
-            background: #fffbe6; /* Paper color */
+            background: #fffbe6;
             color: #2c3e50;
-            padding: 20px;
-            width: 90%;
-            max-width: 600px;
+            padding: 15px;
+            width: 100%;
+            max-width: 500px;
             text-align: center;
-            margin-bottom: 20px;
             border-radius: 2px;
             position: relative;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
             transform: rotate(-1deg);
             transition: transform 0.3s;
+            flex-shrink: 1; /* Allow shrinking if needed */
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
         .wanted-poster::before {
             content: "GESUCHT";
             display: block;
             font-weight: 900;
-            font-size: 2rem;
+            font-size: 1.5rem;
             color: #c0392b;
-            border: 4px solid #c0392b;
+            border: 3px solid #c0392b;
             display: inline-block;
-            padding: 5px 15px;
-            transform: rotate(-5deg);
-            margin-bottom: 10px;
+            padding: 2px 10px;
+            transform: rotate(-3deg);
+            margin: 0 auto 5px auto;
         }
 
-        .description-text {
-            font-size: 1.3rem;
-            line-height: 1.4;
+        .description-text { 
+            font-size: 1.1rem; 
+            line-height: 1.3; 
         }
+        
+        .highlight { color: #d35400; font-weight: bold; }
 
-        .highlight {
-            color: #d35400;
-            font-weight: bold;
-        }
-
-        /* --- LINEUP GRID --- */
+        /* --- LINEUP (Adaptive Grid) --- */
         .lineup-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 15px;
+            flex-grow: 1; /* Take up remaining space */
             width: 100%;
             max-width: 800px;
+            display: grid;
+            gap: 10px;
+            padding-bottom: 10px;
+            /* Default grid, JS will override for specific counts if needed */
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            align-content: center; 
+            justify-content: center;
+        }
+
+        /* Dynamic classes based on suspect count for mobile optimization */
+        .lineup-container.count-3 { grid-template-columns: repeat(3, 1fr); }
+        .lineup-container.count-4 { grid-template-columns: repeat(2, 1fr); }
+        .lineup-container.count-6 { grid-template-columns: repeat(3, 1fr); }
+
+        /* Media query for portrait mobile specifically */
+        @media (max-aspect-ratio: 1/1) {
+            .lineup-container.count-6 { grid-template-columns: repeat(2, 1fr); }
+            .description-text { font-size: 1rem; }
         }
 
         .suspect-card {
             background: var(--card-bg);
-            border-radius: 15px;
-            padding: 10px;
+            border-radius: 12px;
+            padding: 0;
             cursor: pointer;
             position: relative;
-            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             display: flex;
             justify-content: center;
             align-items: center;
-            border-bottom: 6px solid #bdc3c7;
-            animation: popIn 0.4s ease-out backwards;
-        }
-
-        .suspect-card:active {
-            transform: translateY(4px);
-            border-bottom-width: 2px;
-        }
-
-        .suspect-card:hover {
-            transform: translateY(-2px);
-        }
-
-        .suspect-card img {
+            border-bottom: 4px solid #bdc3c7;
+            animation: popIn 0.3s ease-out backwards;
+            height: 100%;
+            max-height: 180px; /* Cap height on large screens */
             width: 100%;
-            height: auto;
-            border-radius: 50%;
-            background: #fff;
         }
 
-        /* Juice Effects */
+        .suspect-card:active { transform: translateY(2px); border-bottom-width: 2px; }
+
+        /* SVG Avatar Styles - Make them scale to fit container */
+        .avatar-svg {
+            width: 100%;
+            height: 100%;
+            max-width: 140px;
+            max-height: 140px;
+        }
+
         .suspect-card.wrong {
             background-color: #fab1a0;
             filter: grayscale(100%);
@@ -162,28 +172,26 @@
             z-index: 10;
         }
 
-        /* Floating Text (Points/Time) */
+        /* --- SCREENS & FX --- */
         .floater {
             position: absolute;
             font-weight: bold;
-            font-size: 1.5rem;
+            font-size: 2rem;
             pointer-events: none;
-            animation: floatUp 1s forwards;
+            animation: floatUp 0.8s forwards;
             z-index: 100;
             text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
 
-        /* Screens (Start/Game Over) */
         .screen {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(44, 62, 80, 0.95);
+            background: rgba(44, 62, 80, 0.98);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 999;
-            backdrop-filter: blur(5px);
         }
         
         .hidden { display: none; }
@@ -199,45 +207,25 @@
             margin-top: 20px;
             font-weight: bold;
             box-shadow: 0 5px 15px rgba(230, 126, 34, 0.4);
-            transition: transform 0.2s;
-        }
-        .btn:hover { transform: scale(1.1); }
-
-        /* Animations */
-        @keyframes popIn {
-            from { opacity: 0; transform: scale(0.5); }
-            to { opacity: 1; transform: scale(1); }
         }
 
+        @keyframes popIn { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
         @keyframes shake {
-            0% { transform: translateX(0); }
-            25% { transform: translateX(-10px); }
-            50% { transform: translateX(10px); }
-            75% { transform: translateX(-10px); }
-            100% { transform: translateX(0); }
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
         }
+        @keyframes floatUp { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-50px); opacity: 0; } }
 
-        @keyframes floatUp {
-            0% { transform: translateY(0); opacity: 1; }
-            100% { transform: translateY(-50px); opacity: 0; }
-        }
-
-        /* Confetti Canvas */
-        #confetti-canvas {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none;
-            z-index: 900;
-        }
-
+        #confetti-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 900; }
     </style>
 </head>
 <body>
 
     <!-- START SCREEN -->
     <div id="start-screen" class="screen">
-        <h1 style="font-size: 3rem; margin-bottom: 0;">Das Phantombild</h1>
-        <p style="font-size: 1.2rem; color: #bdc3c7;">Find the suspect before time runs out!</p>
+        <h1 style="font-size: 2.5rem; margin-bottom: 10px; text-align: center;">Das Phantombild</h1>
+        <p style="font-size: 1.1rem; color: #bdc3c7; text-align: center; max-width: 80%;">Find the suspect based on the German description.</p>
         <button class="btn" onclick="startGame()">Start Game</button>
     </div>
 
@@ -273,35 +261,39 @@
         </div>
     </div>
 
-    <div class="lineup-container" id="lineup">
-        <!-- Cards generated by JS -->
-    </div>
+    <div class="lineup-container" id="lineup"></div>
 
     <canvas id="confetti-canvas"></canvas>
 
 <script>
-    // --- VOCABULARY DATABASE ---
+    // --- DATA ---
     
+    // Values are in standard Nominative/Accusative Plural (ending in -e)
     const hairColors = [
-        { de: "blonde", api: "f59797" },
-        { de: "braune", api: "4a312c" },
-        { de: "schwarze", api: "000000" },
-        { de: "rote", api: "b55835" },
-        { de: "graue", api: "e8e8e8" }
+        { de: "blonde", hex: "#f1c27d", dark: "#e0b06c" },
+        { de: "braune", hex: "#5d4037", dark: "#4e342e" },
+        { de: "schwarze", hex: "#2c2c2c", dark: "#000000" },
+        { de: "rote", hex: "#d84315", dark: "#bf360c" }
+    ];
+
+    const eyeColors = [
+        { de: "blaue", hex: "#42a5f5" },
+        { de: "grüne", hex: "#66bb6a" },
+        { de: "braune", hex: "#795548" }
     ];
 
     const roles = [
         { de: "der Bruder", pron: "Er", gender: "male" },
         { de: "die Schwester", pron: "Sie", gender: "female" },
-        { de: "der Opa", pron: "Er", gender: "male" }, // Just treating as male for hair length logic
-        { de: "die Oma", pron: "Sie", gender: "female" }
+        { de: "der Vater", pron: "Er", gender: "male" }, 
+        { de: "die Mutter", pron: "Sie", gender: "female" }
     ];
 
     const moods = [
-        { de: "glücklich", mouth: "smile", eyes: "happy" },
-        { de: "traurig", mouth: "sad", eyes: "normal" }, // Normal eyes + sad mouth = sad
-        { de: "ernst", mouth: "serious", eyes: "normal" },
-        { de: "böse", mouth: "serious", eyes: "angry" } // Angry eyes + serious mouth = angry
+        { de: "glücklich", type: "happy" },
+        { de: "traurig", type: "sad" },
+        { de: "ernst", type: "serious" },
+        { de: "böse", type: "angry" }
     ];
 
     const glasses = [
@@ -309,18 +301,130 @@
         { de: "keine Brille", has: false }
     ];
 
-    // --- GAME STATE ---
+    // --- STATE ---
     let state = {
         score: 0,
         level: 1,
-        timeLeft: 60, // Total seconds
+        timeLeft: 60,
         maxTime: 60,
         target: null,
         isPlaying: false,
         timerInterval: null
     };
 
-    // --- GENERATORS ---
+    // --- ULTIMATE SVG GENERATOR ---
+    function createComplexAvatar(person) {
+        const skin = "#f3d2c1"; 
+        const skinShadow = "#eebb99";
+        const shirt = `hsl(${Math.random() * 360}, 50%, 45%)`;
+        
+        // Viewbox 200x200
+        let svg = `<svg viewBox="0 0 200 200" class="avatar-svg" xmlns="http://www.w3.org/2000/svg">`;
+        
+        // 1. BODY
+        svg += `<path d="M40,180 Q100,165 160,180 V200 H40 Z" fill="${shirt}"/>`;
+        
+        // 2. FACE BASE
+        svg += `<path d="M60,100 Q60,175 100,175 Q140,175 140,100 Q140,50 100,50 Q60,50 60,100" fill="${skin}"/>`;
+        svg += `<path d="M80,160 Q100,170 120,160" fill="none" stroke="${skinShadow}" stroke-width="3" stroke-linecap="round"/>`; // Chin shadow
+
+        // 3. EARS
+        svg += `<circle cx="58" cy="110" r="12" fill="${skin}"/>`;
+        svg += `<circle cx="142" cy="110" r="12" fill="${skin}"/>`;
+
+        // 4. FEATURES
+        let mouth = "", lb = "", rb = "", extra = "";
+        const mY = 145; 
+        const bY = 90;
+
+        switch(person.mood.type) {
+            case 'happy':
+                // Big open smile with teeth
+                mouth = `<path d="M75,${mY} Q100,${mY+20} 125,${mY} Z" fill="white" stroke="#c0392b" stroke-width="2"/>`; 
+                lb = `M70,${bY} Q85,${bY-15} 95,${bY}`; // High arch
+                rb = `M105,${bY} Q115,${bY-15} 130,${bY}`;
+                break;
+            case 'sad':
+                // Downturned curve
+                mouth = `<path d="M80,${mY+10} Q100,${mY-5} 120,${mY+10}" fill="none" stroke="#c0392b" stroke-width="3" stroke-linecap="round"/>`;
+                // Worried brows (/ \)
+                lb = `M70,${bY} L95,${bY-8}`; 
+                rb = `M105,${bY-8} L130,${bY}`;
+                // TEAR DROP!
+                extra = `<path d="M85,120 Q90,128 85,135 Q80,128 85,120" fill="#3498db" opacity="0.8"/>`;
+                break;
+            case 'angry':
+                // Gritted teeth / squiggle
+                mouth = `<path d="M80,${mY+5} L90,${mY} L100,${mY+5} L110,${mY} L120,${mY+5}" fill="none" stroke="#c0392b" stroke-width="2"/>`;
+                // Angry brows (\ /)
+                lb = `M70,${bY-5} L95,${bY+10}`;
+                rb = `M105,${bY+10} L130,${bY-5}`;
+                break;
+            case 'serious':
+                // Straight line
+                mouth = `<line x1="85" y1="${mY+5}" x2="115" y2="${mY+5}" stroke="#c0392b" stroke-width="3" stroke-linecap="round"/>`;
+                lb = `M70,${bY} L95,${bY}`;
+                rb = `M105,${bY} L130,${bY}`;
+                break;
+        }
+
+        // Eyebrows
+        svg += `<path d="${lb}" stroke="${person.hair.dark}" stroke-width="4" fill="none" stroke-linecap="round" />`;
+        svg += `<path d="${rb}" stroke="${person.hair.dark}" stroke-width="4" fill="none" stroke-linecap="round" />`;
+
+        // Eyes
+        svg += `<g>`;
+        // Sclera
+        svg += `<circle cx="80" cy="110" r="10" fill="white"/>`;
+        svg += `<circle cx="120" cy="110" r="10" fill="white"/>`;
+        // Iris
+        svg += `<circle cx="80" cy="110" r="6" fill="${person.eye.hex}"/>`;
+        svg += `<circle cx="120" cy="110" r="6" fill="${person.eye.hex}"/>`;
+        // Pupil
+        svg += `<circle cx="80" cy="110" r="3" fill="#222"/>`;
+        svg += `<circle cx="120" cy="110" r="3" fill="#222"/>`;
+        svg += `</g>`;
+
+        // Nose
+        svg += `<path d="M100,118 L95,132 L105,132 Z" fill="${skinShadow}"/>`;
+
+        // Add Mouth & Extra (Tear)
+        svg += mouth;
+        svg += extra;
+
+        // 5. GLASSES
+        if(person.glass.has) {
+            svg += `<g stroke="#333" stroke-width="2.5" fill="rgba(255,255,255,0.3)">
+                <circle cx="80" cy="110" r="17"/>
+                <circle cx="120" cy="110" r="17"/>
+                <line x1="97" y1="110" x2="103" y2="110"/>
+                <line x1="63" y1="110" x2="55" y2="105"/>
+                <line x1="137" y1="110" x2="145" y2="105"/>
+            </g>`;
+        }
+
+        // 6. HAIR
+        const hC = person.hair.hex;
+        if (person.role.gender === 'female') {
+            // Back
+            svg = `<path d="M60,100 Q40,180 30,200 H170 Q160,180 140,100" fill="${hC}"/>` + svg;
+            // Front Bangs
+            svg += `<path d="M60,90 Q60,35 100,35 Q140,35 140,90 L140,60 Q100,50 60,60 Z" fill="${hC}"/>`;
+            // Sides
+            svg += `<path d="M140,60 Q148,120 155,160 L130,160 Q135,100 140,60" fill="${hC}"/>`;
+            svg += `<path d="M60,60 Q52,120 45,160 L70,160 Q65,100 60,60" fill="${hC}"/>`;
+        } else {
+            // Short
+            svg += `<path d="M55,90 Q60,25 100,25 Q140,25 145,90 Q145,55 100,40 Q55,55 55,90" fill="${hC}"/>`;
+            svg += `<path d="M58,90 V115 L65,105 V90 Z" fill="${hC}"/>`; // Sideburns
+            svg += `<path d="M142,90 V115 L135,105 V90 Z" fill="${hC}"/>`;
+        }
+
+        svg += `</svg>`;
+        return svg;
+    }
+
+    // --- LOGIC ---
 
     function getRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
@@ -328,51 +432,17 @@
         return {
             id: Math.random().toString(36).substr(2, 9),
             hair: getRandom(hairColors),
+            eye: getRandom(eyeColors),
             role: getRandom(roles),
             mood: getRandom(moods),
-            glass: getRandom(glasses),
-            seed: Math.random() // For DiceBear
+            glass: getRandom(glasses)
         };
     }
-
-    // Build API URL based on person properties
-    function getAvatarUrl(person) {
-        let url = `https://api.dicebear.com/9.x/avataaars/svg?seed=${person.seed}`;
-        
-        // Hair Color
-        url += `&hairColor=${person.hair.api}`;
-        
-        // Gender/Hair Length (Heuristic)
-        if(person.role.gender === 'female') {
-            url += `&top=longHairStraight,longHairBob,longHairCurly`;
-        } else {
-            url += `&top=shortHairShortFlat,shortHairTheCaesar,shortHairFrizzle`;
-        }
-
-        // Mood (Mouth & Eyes)
-        url += `&mouth=${person.mood.mouth}&eyes=${person.mood.eyes}`;
-
-        // Glasses
-        if(person.glass.has) {
-            url += `&accessories=kurt,prescription01,prescription02&accessoriesProbability=100`;
-        } else {
-            url += `&accessoriesProbability=0`;
-        }
-
-        return url;
-    }
-
-    // --- GAME LOGIC ---
 
     function startGame() {
         document.getElementById('start-screen').classList.add('hidden');
         document.getElementById('game-over-screen').classList.add('hidden');
-        
-        state.score = 0;
-        state.level = 1;
-        state.timeLeft = 60;
-        state.isPlaying = true;
-        
+        state.score = 0; state.level = 1; state.timeLeft = 60; state.isPlaying = true;
         updateHUD();
         startTimer();
         newRound();
@@ -382,16 +452,12 @@
         if(state.timerInterval) clearInterval(state.timerInterval);
         state.timerInterval = setInterval(() => {
             if(!state.isPlaying) return;
-            
             state.timeLeft -= 0.1;
-            
             const bar = document.getElementById('timer-bar');
             const pct = (state.timeLeft / state.maxTime) * 100;
             bar.style.width = `${pct}%`;
-
             if(state.timeLeft <= 10) bar.classList.add('critical');
             else bar.classList.remove('critical');
-
             if(state.timeLeft <= 0) gameOver();
         }, 100);
     }
@@ -404,143 +470,124 @@
     }
 
     function determineLevel() {
-        // Difficulty scaling
-        if(state.score < 3) return 1; // Just Hair
-        if(state.score < 8) return 2; // Hair + Role
-        if(state.score < 15) return 3; // Hair + Role + Glasses
-        return 4; // Everything
+        if(state.score < 3) return 1; // Hair
+        if(state.score < 6) return 2; // Hair + Role
+        if(state.score < 10) return 3; // + Eyes
+        if(state.score < 15) return 4; // + Mood
+        return 5; // + Glasses (Max difficulty)
     }
 
     function newRound() {
         if(!state.isPlaying) return;
-
         state.level = determineLevel();
         updateHUD();
 
-        // 1. Create Target
         const target = generatePerson();
         state.target = target;
 
-        // 2. Determine Lineup Size
         let count = 3;
         if(state.level >= 2) count = 4;
         if(state.level >= 4) count = 6;
 
-        // 3. Generate Distractors
-        // Distractors must NOT match the specific clues given in the current level
+        // Reset grid class
+        const container = document.getElementById('lineup');
+        container.className = 'lineup-container count-' + count;
+
         let suspects = [target];
-        
         while(suspects.length < count) {
             let d = generatePerson();
             let clash = false;
-
-            // CHECK CLASHES (Don't create a duplicate of the correct answer)
-            // Logic: A distractor is bad if it matches ALL the clues we are about to give.
             
-            let matchesHair = d.hair.de === target.hair.de;
-            let matchesRole = d.role.de === target.role.de;
-            let matchesGlass = d.glass.de === target.glass.de;
-            let matchesMood = d.mood.de === target.mood.de;
+            let mH = d.hair.de === target.hair.de;
+            let mE = d.eye.de === target.eye.de;
+            let mR = d.role.de === target.role.de;
+            let mM = d.mood.de === target.mood.de;
+            let mG = d.glass.de === target.glass.de;
 
-            if (state.level === 1) {
-                if(matchesHair) clash = true; // Level 1 clue is only hair. Distractor can't have same hair.
-            } else if (state.level === 2) {
-                if(matchesHair && matchesRole) clash = true; 
-            } else if (state.level === 3) {
-                if(matchesHair && matchesRole && matchesGlass) clash = true;
-            } else {
-                if(matchesHair && matchesRole && matchesGlass && matchesMood) clash = true;
-            }
+            // Logic: Distractors must NOT match the visible clues for this level
+            if(state.level === 1) { if(mH) clash = true; }
+            else if(state.level === 2) { if(mH && mR) clash = true; }
+            else if(state.level === 3) { if(mH && mR && mE) clash = true; }
+            else if(state.level === 4) { if(mH && mR && mE && mM) clash = true; }
+            else { if(mH && mR && mE && mM && mG) clash = true; }
 
             if(!clash) suspects.push(d);
         }
-
-        // Shuffle
         suspects.sort(() => Math.random() - 0.5);
-
-        // 4. Render
         renderScene(target, suspects);
     }
 
     function renderScene(target, suspects) {
-        // Build Description String
         let html = "";
         const h = `<span class='highlight'>`;
         const e = `</span>`;
 
         if(state.level === 1) {
-            html = `Gesucht wird eine Person mit ${h}${target.hair.de} Haaren${e}.`;
-        } 
-        else if (state.level === 2) {
+            // FIX: Dative case! "mit" requires dative plural ending (n)
+            // braune -> braunen, blonde -> blonden
+            html = `Gesucht wird eine Person mit ${h}${target.hair.de}n Haaren${e}.`;
+        } else if (state.level === 2) {
             html = `Gesucht wird ${h}${target.role.de}${e}.<br>
                     ${target.role.pron} hat ${h}${target.hair.de} Haare${e}.`;
-        }
-        else if (state.level === 3) {
+        } else if (state.level === 3) {
             html = `Gesucht wird ${h}${target.role.de}${e}.<br>
-                    ${target.role.pron} hat ${h}${target.hair.de} Haare${e}.<br>
-                    ${target.role.pron} hat ${h}${target.glass.de}${e}.`;
-        }
-        else {
+                    ${target.role.pron} hat ${h}${target.eye.de} Augen${e}.<br>
+                    (Und ${target.hair.de} Haare)`;
+        } else if (state.level === 4) {
              html = `Gesucht wird ${h}${target.role.de}${e}.<br>
+                    ${target.role.pron} ist ${h}${target.mood.de}${e}.<br>
+                    ${target.role.pron} hat ${h}${target.eye.de} Augen${e}.`;
+        } else {
+            html = `Gesucht wird ${h}${target.role.de}${e}.<br>
                     ${target.role.pron} ist ${h}${target.mood.de}${e}.<br>
                     ${target.role.pron} hat ${h}${target.hair.de} Haare${e} und ${h}${target.glass.de}${e}.`;
         }
 
         document.getElementById('description').innerHTML = html;
-
-        // Build Cards
         const container = document.getElementById('lineup');
         container.innerHTML = '';
 
         suspects.forEach((p, index) => {
             const card = document.createElement('div');
             card.className = 'suspect-card';
-            card.style.animationDelay = `${index * 0.1}s`; // Staggered entrance
+            // Stagger animation
+            card.style.animationDelay = `${index * 0.05}s`;
             
-            const img = document.createElement('img');
-            img.src = getAvatarUrl(p);
-            
-            card.appendChild(img);
+            card.innerHTML = createComplexAvatar(p);
             card.onclick = (e) => handleGuess(p.id, card, e);
-            
             container.appendChild(card);
         });
     }
 
     function handleGuess(id, card, event) {
         if(card.classList.contains('wrong') || card.classList.contains('correct')) return;
-
+        
         if(id === state.target.id) {
             // CORRECT
             card.classList.add('correct');
             state.score++;
             
-            // Time Bonus
-            let bonus = 3;
+            // Add time
+            let bonus = 3; 
             if(state.level >= 3) bonus = 5;
             state.timeLeft = Math.min(state.timeLeft + bonus, state.maxTime);
             
+            // Visuals
             showFloater(event.clientX, event.clientY, `+${bonus}s`, '#2ecc71');
             fireConfetti();
-
-            setTimeout(newRound, 1000); // Wait 1s then next round
+            
+            setTimeout(newRound, 1000);
         } else {
             // WRONG
             card.classList.add('wrong');
-            state.timeLeft -= 2;
-            showFloater(event.clientX, event.clientY, `-2s`, '#e74c3c');
+            state.timeLeft -= 3;
+            showFloater(event.clientX, event.clientY, `-3s`, '#e74c3c');
             
-            // Shake the poster
             const poster = document.getElementById('poster');
-            poster.style.transform = "rotate(5deg) scale(0.95)";
+            poster.style.transform = "rotate(3deg) scale(0.95)";
             setTimeout(() => poster.style.transform = "rotate(-1deg)", 200);
         }
         updateHUD();
-    }
-
-    function updateHUD() {
-        document.getElementById('score-display').textContent = state.score;
-        document.getElementById('level-display').textContent = state.level;
     }
 
     function showFloater(x, y, text, color) {
@@ -551,48 +598,33 @@
         el.style.top = y + 'px';
         el.style.color = color;
         document.body.appendChild(el);
-        setTimeout(() => el.remove(), 1000);
+        setTimeout(() => el.remove(), 800);
     }
 
-    // --- CONFETTI (Simple Implementation) ---
+    function updateHUD() {
+        document.getElementById('score-display').textContent = state.score;
+        document.getElementById('level-display').textContent = state.level;
+    }
+
     function fireConfetti() {
         const canvas = document.getElementById('confetti-canvas');
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
-        
         const pieces = [];
-        for(let i=0; i<50; i++) {
-            pieces.push({
-                x: canvas.width / 2,
-                y: canvas.height / 2,
-                vx: (Math.random() - 0.5) * 10,
-                vy: (Math.random() - 1) * 10,
-                color: `hsl(${Math.random()*360}, 100%, 50%)`
-            });
-        }
-
+        for(let i=0; i<40; i++) pieces.push({x: canvas.width/2, y: canvas.height/2, vx: (Math.random()-0.5)*15, vy: (Math.random()-1)*15, color: `hsl(${Math.random()*360},100%,50%)`});
         function animate() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             let alive = false;
             pieces.forEach(p => {
-                p.x += p.vx;
-                p.y += p.vy;
-                p.vy += 0.2; // Gravity
-                p.vx *= 0.95; // Air resistance
-                
-                if(p.y < canvas.height) {
-                    alive = true;
-                    ctx.fillStyle = p.color;
-                    ctx.fillRect(p.x, p.y, 6, 6);
-                }
+                p.x += p.vx; p.y += p.vy; p.vy += 0.5; p.vx *= 0.95;
+                if(p.y < canvas.height) { alive = true; ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, 8, 8); }
             });
             if(alive) requestAnimationFrame(animate);
             else ctx.clearRect(0,0,canvas.width, canvas.height);
         }
         animate();
     }
-
 </script>
 </body>
 </html>
